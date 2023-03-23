@@ -1,0 +1,179 @@
+﻿@{
+	ViewData["Title"] = "Home Page";
+}
+
+@section Styles{
+
+					<style>
+							#grid td {
+								width: 20px;
+								height: 20px;
+									border: 1px solid black;
+							}
+						</style>
+}
+
+<div class="container">
+	<h2>Game of Life</h2>
+	<p>The Game of Life is a game where you have a grid of cells that can be either alive (colored) or dead (not colored). The game starts with some cells being alive and some being dead. Then the game changes over time based on some simple rules.</p>
+
+<p>The rules are like this:</p>
+<ol>
+	<li>If a cell is alive and has less than 2 alive neighbors, it dies because it's lonely.</li>
+	<li>If a cell is alive and has more than 3 alive neighbors, it dies because it's too crowded.</li>
+	<li>If a cell is dead and has exactly 3 alive neighbors, it comes to life because it's just right.</li>
+	<li>Otherwise, the cell stays the same.</li>
+</ol>
+
+<p>So the game changes over time based on these rules. You can watch as patterns form and change on the grid.</p>
+<br />	
+<button id="reset" class="btn btn-warning">Reset</button>
+	<button id="start" class="btn btn-success">Start</button>
+	<button id="pause" class="btn btn-danger">Pause</button>
+	<table class="table table-bordered" id="grid"></table>
+
+	
+	
+</div>
+
+@section Scripts{
+
+
+							<script>
+						var rows = 50;
+		var cols = 50;
+		var interval;
+
+						// create the grid
+						for (var i = 0; i < rows; i++) {
+							var row = $('<tr></tr>');
+							for (var j = 0; j < cols; j++) {
+								var cell = $('<td></td>');
+								cell.data('alive', false);
+								row.append(cell);
+							}
+							$('#grid').append(row);
+						}
+
+							// update the grid
+						function update() {
+							$('#grid td').each(function() {
+								var alive = $(this).data('alive');
+								if (alive) {
+									$(this).addClass('bg-success');
+								} else {
+									$(this).removeClass('bg-success');
+								}
+							});
+						}
+
+
+						// randomize the grid
+						function randomize() {
+							$('#grid td').each(function() {
+								var alive = Math.random() > 0.5;
+								$(this).data('alive', alive);
+							});
+						}
+
+
+					// reset the grid
+					$('#reset').click(function() {
+						clearInterval(interval);
+						randomize();
+						update();
+					});
+
+					// start the game
+					$('#start').click(function() {
+						clearInterval(interval);
+						interval = setInterval(function() {
+							// TODO: implement game logic here
+							// get the current state of the grid
+					var grid = [];
+					$('#grid tr').each(function() {
+						var row = [];
+						$(this).find('td').each(function() {
+							row.push($(this).data('alive'));
+						});
+						grid.push(row);
+					});
+
+					// create a new grid for the next generation
+					var nextGrid = [];
+					for (var i = 0; i < rows; i++) {
+						nextGrid[i] = [];
+						for (var j = 0; j < cols; j++) {
+							var alive = grid[i][j];
+							var neighbors = countNeighbors(grid, i, j);
+
+							// apply the rules of the game
+							if (alive && neighbors < 2) {
+								nextGrid[i][j] = false;
+							} else if (alive && neighbors > 3) {
+								nextGrid[i][j] = false;
+							} else if (!alive && neighbors == 3) {
+								nextGrid[i][j] = true;
+							} else {
+								nextGrid[i][j] = alive;
+							}
+						}
+					}
+
+					// update the grid with the new state
+					for (var i = 0; i < rows; i++) {
+						for (var j = 0; j < cols; j++) {
+							$('#grid tr').eq(i).find('td').eq(j).data('alive', nextGrid[i][j]);
+						}
+					}
+
+					update();
+						}, 1000);
+					});
+
+
+		// pause the game
+					$('#pause').click(function() {
+						clearInterval(interval);
+					});
+
+
+
+
+
+
+				// count the number of alive neighbors for a given cell
+				function countNeighbors(grid, x, y) {
+					var count = 0;
+
+					// check top left neighbor
+					if (x > 0 && y > 0 && grid[x-1][y-1]) count++;
+
+					// check top neighbor
+					if (x > 0 && grid[x-1][y]) count++;
+
+					// check top right neighbor
+					if (x > 0 && y < cols-1 && grid[x-1][y+1]) count++;
+						// check left neighbor
+					if (y > 0 && grid[x][y-1]) count++;
+
+					// check right neighbor
+					if (y < cols-1 && grid[x][y+1]) count++;
+
+					// check bottom left neighbor
+					if (x < rows-1 && y > 0 && grid[x+1][y-1]) count++;
+
+					// check bottom neighbor
+					if (x < rows-1 && grid[x+1][y]) count++;
+
+					// check bottom right neighbor
+					if (x < rows-1 && y < cols-1 && grid[x+1][y+1]) count++;
+
+					return count;
+					}
+
+
+						randomize();
+						update();
+						</script>
+}
